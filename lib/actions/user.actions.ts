@@ -15,7 +15,6 @@ export async function createUser(user: CreateUserParams) {
     // Add the user to your database here
     const newUser = await User.create(user);
     return JSON.parse(JSON.stringify(newUser));
-    return { message: "User created successfully" };
   } catch (error) {
     handleError(error);
   }
