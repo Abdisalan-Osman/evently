@@ -1,4 +1,4 @@
-import { Document, Schema, model, models } from "mongoose";
+import mongoose, { Document, Schema, model, models } from "mongoose";
 
 export interface IEvent extends Document {
   _id: string;
@@ -16,7 +16,7 @@ export interface IEvent extends Document {
   orgonizer: { _id: string; firstName: string; lastName: string };
 }
 
-const eventsSchema = new Schema({
+const eventsSchema = new mongoose.Schema({
   title: { type: String, required: true, unique: true },
   description: { type: String },
   location: { type: String },

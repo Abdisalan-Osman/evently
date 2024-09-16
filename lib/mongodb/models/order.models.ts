@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from "mongoose";
+import mongoose, { Schema, model, models, Document } from "mongoose";
 
 export interface IOrder extends Document {
   createdAt: Date;
@@ -24,7 +24,7 @@ export type IOrderItem = {
   buyer: string;
 };
 
-const orderSchema = new Schema({
+const orderSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,

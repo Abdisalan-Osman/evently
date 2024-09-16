@@ -1,11 +1,11 @@
-import { Document, Schema, model, models } from "mongoose";
+import mongoose, { Document, Schema, model, models } from "mongoose";
 
 export interface ICategory extends Document {
   _id: string;
   name: string;
 }
 
-const categorySchema = new Schema({
+const categorySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
 });
 
