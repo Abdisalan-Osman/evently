@@ -63,37 +63,69 @@ export async function POST(req: Request) {
       first_name,
       last_name,
       username,
-    } = evt.data;
-    const user = {
-      clerkId: id,
-      email: email_addresses[0]?.email_address || "",
-      userName: username || "",
-      firstName: first_name || "",
-      lastName: last_name || "",
-      photo: image_url || "",
-    };
+    } = evt?.data;
 
-    const newUser = await createUser(user);
+    try {
+      const user = {
+        clerkId: id,
+        email: email_addresses[0]?.email_address || "",
+        username: username || "",
+        firstName: first_name || "",
+        lastName: last_name || "",
+        photo: image_url || "",
+      };
 
-    if (newUser) {
-      await clerkClient.users.updateUserMetadata(id, {
-        publicMetadata: {
-          userId: newUser._id,
-        },
+      await createUser(user);
+
+      return new Response("User is created ", {
+        status: 200,
+      });
+    } catch (error) {
+      console.log("Error creating  user:", error);
+      return new Response("Error occured", {
+        status: 400,
       });
     }
+  }
 
-    return NextResponse.json({ message: "OK", user: newUser });
+  if (eventType === "user.updated") {
+    const { id, image_url, first_name, last_name, username } = evt?.data;
+
+    try {
+      const user = {
+        firstName: first_name || "",
+        lastName: last_name || "",
+        username: username || "",
+        photo: image_url,
+      };
+
+      await updateUser(id, user);
+
+      return new Response("User is  updated", {
+        status: 200,
+      });
+    } catch (error) {
+      console.log("Error c updating user:", error);
+      return new Response("Error occured", {
+        status: 400,
+      });
+    }
   }
 
   if (eventType === "user.deleted") {
-    const { id } = evt.data;
-
-    const deletedUser = await deleteUser(id || "");
-
-    return NextResponse.json({ message: "OK", user: deletedUser });
+    const { id } = evt?.data;
+    try {
+      await deleteUser(id || "");
+      return new Response("User is deleted", {
+        status: 200,
+      });
+    } catch (error) {
+      console.log("Error deleting user:", error);
+      return new Response("Error occured", {
+        status: 400,
+      });
+    }
   }
-
   return new Response("Recieved", { status: 200 });
 }
 
