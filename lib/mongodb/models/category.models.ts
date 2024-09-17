@@ -9,6 +9,7 @@ const categorySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
 });
 
-const Category = models.Category || model("Category", categorySchema);
+const Category =
+  mongoose.models.Category || mongoose.model("Category", categorySchema);
 
 export default Category;

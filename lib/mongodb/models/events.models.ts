@@ -31,6 +31,6 @@ const eventsSchema = new mongoose.Schema({
   orgonizer: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
-const Event = models.Event || model("Event", eventsSchema);
+const Event = mongoose.models.Event || mongoose.model("Event", eventsSchema);
 
 export default Event;
