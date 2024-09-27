@@ -5,33 +5,40 @@ import User from "../mongodb/models/user.model";
 import Event from "../mongodb/models/events.models";
 import { revalidatePath } from "next/cache"; // Ensure you're using the correct import for revalidation
 import Order from "../mongodb/models/order.models";
-import { CreateUserParams, UpdateUserParams } from "@/types";
+
 import { connectDB } from "../mongodb";
 
-// Ensure connectDB is called before any database operations
-async function ensureDBConnection() {
-  try {
-    await connectDB(); // Ensure this is awaited to handle connection properly
-  } catch (error) {
-    throw new Error("Database connection failed");
-  }
+// Type definitions for creating and updating users
+interface CreateUserParams {
+  clerkId: string;
+  email: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  photo: string;
+}
+
+interface UpdateUserParams {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  photo?: string;
 }
 
 export async function createUser(user: CreateUserParams) {
   try {
-    await ensureDBConnection(); // Ensure database is connected
-
+    await connectDB();
     const newUser = await User.create(user);
-    return JSON.parse(JSON.stringify(newUser));
+    JSON.parse(JSON.stringify(newUser));
   } catch (error) {
-    handleError(error);
-    throw error; // Rethrow error after handling it
+    console.error("Error creating user:", error);
+    throw new Error("Failed to create user");
   }
 }
 
 export async function updateUser(clerkId: string, user: UpdateUserParams) {
   try {
-    await ensureDBConnection(); // Ensure database is connected
+    await connectDB(); // Ensure database is connected
 
     const updatedUser = await User.findOneAndUpdate({ clerkId }, user, {
       new: true,
@@ -47,7 +54,7 @@ export async function updateUser(clerkId: string, user: UpdateUserParams) {
 
 export async function deleteUser(clerkId: string) {
   try {
-    await ensureDBConnection(); // Ensure database is connected
+    await connectDB(); // Ensure database is connected
 
     // Find user to delete
     const userToDelete = await User.findOne({ clerkId });
