@@ -1,42 +1,36 @@
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 
-let isConnected = false;
+const MONGO_URL = process.env.MONGO_URL;
 
-export const connectDB = async () => {
-  mongoose.set("strictQuery", true);
-
-  if (!process.env.MONGO_URL) return console.log("MONGODB_URL not found");
-
-  if (isConnected) return console.log("Already connected to MongoDb");
-
-  try {
-    await mongoose.connect(process.env.MONGO_URL);
-
-    isConnected = true;
-    console.log("Connected to MongoDb");
-  } catch (error) {
-    console.log(error);
-  }
+let cached: { conn: Connection | null; promise: Promise<Connection> | null } = {
+  conn: null,
+  promise: null,
 };
 
-// import mongoose from "mongoose";
+export const connectDB = async (): Promise<Connection> => {
+  // Return the cached connection if it exists
+  if (cached.conn) return cached.conn;
 
-// let cached = (global as any).mongoose || { conn: null, Promise: null };
+  if (!MONGO_URL) throw new Error("MONGO_URI is missing");
 
-// const MONGO_URL = process.env.MONGO_URL;
+  // If no promise is cached, create a new connection promise
+  if (!cached.promise) {
+    cached.promise = mongoose
+      .connect(MONGO_URL, {
+        dbName: "evently",
+        bufferCommands: false, // Optional, can be omitted if you don't need it
+      })
+      .then((client) => {
+        cached.conn = client.connection; // Get the connection from the client
+        return cached.conn; // Return the connection
+      });
+  }
 
-// export const connectDB = async () => {
-//   if (cached.conn) return cached.conn;
-
-//   if (!MONGO_URL) throw new Error("MONGO_URL is missing");
-
-//   cached.Promise =
-//     cached.Promise ||
-//     mongoose.connect(MONGO_URL, {
-//       dbName: "evently",
-//       bufferCommands: false,
-//     });
-
-//   cached.conn = await cached.Promise;
-//   return cached.conn;
-// };
+  try {
+    // Await the connection promise and cache the connection
+    return await cached.promise; // Return the established connection
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    throw new Error("Failed to connect to MongoDB");
+  }
+};

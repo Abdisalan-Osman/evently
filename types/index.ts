@@ -147,3 +147,17 @@ export type SearchParamProps = {
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
+
+export interface ClerkWebhookEvent {
+  id: string;
+  type: string; // Event type, e.g., "user.created"
+  data: {
+    id: string;
+    email_addresses: { email_address: string }[];
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+    image_url?: string;
+    // Add any other properties that are relevant based on your use case
+  };
+}
