@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, model, models } from "mongoose";
+import mongoose from "mongoose";
 
 export interface ICategory extends Document {
   _id: string;
