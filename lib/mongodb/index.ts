@@ -1,25 +1,22 @@
 import mongoose from "mongoose";
 
-const MONGO_URL = process.env.MONGO_URL;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGO_URL) throw new Error("MONGO_URL is not defined");
-
-// Type assertion to bypass the error
 let cached = (global as any).mongoose || { conn: null, promise: null };
 
-if (!cached.promise) {
-  cached.promise = mongoose
-    .connect(MONGO_URL, {
+export const connectToDatabase = async () => {
+  if (cached.conn) return cached.conn;
+
+  if (!MONGODB_URI) throw new Error("MONGODB_URI is missing");
+
+  cached.promise =
+    cached.promise ||
+    mongoose.connect(MONGODB_URI, {
       dbName: "evently",
       bufferCommands: false,
-    })
-    .then((mongoose) => mongoose);
-}
+    });
 
-export const connectDB = async () => {
-  if (!cached.conn) {
-    cached.conn = await cached.promise;
-  }
-  (global as any).mongoose = cached; // Cache the mongoose connection globally
+  cached.conn = await cached.promise;
+
   return cached.conn;
 };
