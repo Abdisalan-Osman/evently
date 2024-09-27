@@ -184,7 +184,7 @@ function EventForm({ userId, type }: EventFormProps) {
                   <div className="flex-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
                     <Image
                       src="/assets/icons/calendar.svg"
-                      alt="calender"
+                      alt="calendar"
                       width={24}
                       height={24}
                       className="filter-grey"
@@ -192,10 +192,9 @@ function EventForm({ userId, type }: EventFormProps) {
                     <p className="ml-3 whitespace-nowrap text-grey-600">
                       Start Date:
                     </p>
-
                     <DatePicker
                       selected={field.value}
-                      onChange={(date: Date) => field.onChange(date)}
+                      onChange={(date) => field.onChange(date)}
                       showTimeSelect
                       timeInputLabel="Time:"
                       dateFormat="MM/dd/yyyy h:mm aa"
@@ -203,7 +202,6 @@ function EventForm({ userId, type }: EventFormProps) {
                     />
                   </div>
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -230,7 +228,7 @@ function EventForm({ userId, type }: EventFormProps) {
 
                     <DatePicker
                       selected={field.value}
-                      onChange={(date: Date) => field.onChange(date)}
+                      onChange={(date) => field.onChange(date)}
                       showTimeSelect
                       timeInputLabel="Time:"
                       dateFormat="MM/dd/yyyy h:mm aa"
