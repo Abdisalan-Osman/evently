@@ -1,37 +1,42 @@
-"use server"; // Make sure this is appropriate for your Next.js setup
+"use server";
 
-import { handleError } from "../utils"; // Make sure handleError is defined properly
-import User from "../mongodb/models/user.model";
-import Event from "../mongodb/models/events.models";
-import { revalidatePath } from "next/cache"; // Ensure you're using the correct import for revalidation
-import Order from "../mongodb/models/order.models";
+import { revalidatePath } from "next/cache";
 
-import { connectDB } from "../mongodb";
-import { CreateUserParams } from "@/types";
+import { connectDB } from "@/lib/mongodb/index";
+import User from "@/lib/mongodb/models/user.model";
+import Order from "@/lib/mongodb/models/order.models";
+import Event from "@/lib/mongodb/models/events.models";
+import { handleError } from "@/lib/utils";
 
-// Type definitions for creating and updating users
-
-interface UpdateUserParams {
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  photo?: string;
-}
+import { CreateUserParams, UpdateUserParams } from "@/types";
 
 export async function createUser(user: CreateUserParams) {
   try {
     await connectDB();
+
     const newUser = await User.create(user);
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
-    console.error("Error creating user:", error);
-    throw new Error("Failed to create user");
+    handleError(error);
+  }
+}
+
+export async function getUserById(userId: string) {
+  try {
+    await connectDB();
+
+    const user = await User.findById(userId);
+
+    if (!user) throw new Error("User not found");
+    return JSON.parse(JSON.stringify(user));
+  } catch (error) {
+    handleError(error);
   }
 }
 
 export async function updateUser(clerkId: string, user: UpdateUserParams) {
   try {
-    await connectDB(); // Ensure database is connected
+    await connectDB();
 
     const updatedUser = await User.findOneAndUpdate({ clerkId }, user, {
       new: true,
@@ -41,13 +46,12 @@ export async function updateUser(clerkId: string, user: UpdateUserParams) {
     return JSON.parse(JSON.stringify(updatedUser));
   } catch (error) {
     handleError(error);
-    throw error; // Rethrow error after handling it
   }
 }
 
 export async function deleteUser(clerkId: string) {
   try {
-    await connectDB(); // Ensure database is connected
+    await connectDB();
 
     // Find user to delete
     const userToDelete = await User.findOne({ clerkId });
@@ -73,11 +77,10 @@ export async function deleteUser(clerkId: string) {
 
     // Delete user
     const deletedUser = await User.findByIdAndDelete(userToDelete._id);
-    await revalidatePath("/"); // Ensure revalidation is awaited
+    revalidatePath("/");
 
     return deletedUser ? JSON.parse(JSON.stringify(deletedUser)) : null;
   } catch (error) {
     handleError(error);
-    throw error; // Rethrow error after handling it
   }
 }
