@@ -7,16 +7,9 @@ import { revalidatePath } from "next/cache"; // Ensure you're using the correct 
 import Order from "../mongodb/models/order.models";
 
 import { connectDB } from "../mongodb";
+import { CreateUserParams } from "@/types";
 
 // Type definitions for creating and updating users
-interface CreateUserParams {
-  clerkId: string;
-  email: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  photo: string;
-}
 
 interface UpdateUserParams {
   username?: string;
@@ -28,12 +21,8 @@ interface UpdateUserParams {
 export async function createUser(user: CreateUserParams) {
   try {
     await connectDB();
-    // Check for missing required fields
-    if (!user.clerkId || !user.email || !user.username) {
-      throw new Error("Missing required user data");
-    }
     const newUser = await User.create(user);
-    JSON.parse(JSON.stringify(newUser));
+    return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
     console.error("Error creating user:", error);
     throw new Error("Failed to create user");
