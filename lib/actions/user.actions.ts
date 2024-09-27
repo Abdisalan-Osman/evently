@@ -5,93 +5,45 @@ import User from "../mongodb/models/user.model";
 import Event from "../mongodb/models/events.models";
 import { revalidatePath } from "next/cache";
 import Order from "../mongodb/models/order.models";
+import { CreateUserParams, UpdateUserParams } from "@/types";
 
 ///////////////////////////////////////////
 ////////////////////////////////////////
 
-interface Props {
-  id: string;
-  first_name: string;
-  last_name: string;
-  image_url: string;
-  email_addresses: { email_address: string }[];
-  username: string;
-}
-
-export async function createUser({
-  id,
-  first_name,
-  last_name,
-  image_url,
-  email_addresses,
-  username,
-}: Props) {
+export async function createUser(user: CreateUserParams) {
   try {
     await connectDB();
-    const user = await User.create({
-      clerkId: id,
-      firstName: first_name,
-      lastName: last_name,
-      photo: image_url,
-      email: email_addresses[0].email_address,
-      username: username,
+
+    const newUser = await User.create(user);
+    return JSON.parse(JSON.stringify(newUser));
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+export async function updateUser(clerkId: string, user: UpdateUserParams) {
+  try {
+    await connectDB();
+
+    const updatedUser = await User.findOneAndUpdate({ clerkId }, user, {
+      new: true,
     });
 
-    return user;
+    if (!updatedUser) throw new Error("User update failed");
+    return JSON.parse(JSON.stringify(updatedUser));
   } catch (error) {
     handleError(error);
   }
 }
 
-export async function updateUser({
-  id,
-  first_name,
-  last_name,
-  image_url,
-  email_addresses,
-  username,
-}: Props) {
-  try {
-    await connectDB();
-    const user = await User.findByIdAndUpdate(
-      { clerkId: id },
-      {
-        $set: {
-          firstName: first_name,
-          lastName: last_name,
-          photo: image_url,
-          email: email_addresses[0].email_address,
-          username: username,
-        },
-      },
-      { new: true, upsert: true }
-    );
-
-    return user;
-  } catch (error) {
-    handleError(error);
-  }
-}
-
-export async function getUserById(userId: string) {
+export async function deleteUser(clerkId: string) {
   try {
     await connectDB();
 
-    const user = await User.findById(userId);
+    // Find user to delete
+    const userToDelete = await User.findOne({ clerkId });
 
-    if (!user) throw new Error("User not found");
-    return JSON.parse(JSON.stringify(user));
-  } catch (error) {
-    handleError(error);
-  }
-}
-
-export async function deleteUser(id: string) {
-  try {
-    await connectDB();
-
-    const user = await User.findOneAndDelete({ clerkId: id });
-    if (!user) {
+    if (!userToDelete) {
       throw new Error("User not found");
     }
 
@@ -99,19 +51,22 @@ export async function deleteUser(id: string) {
     await Promise.all([
       // Update the 'events' collection to remove references to the user
       Event.updateMany(
-        { _id: { $in: user.events } },
-        { $pull: { organizer: user._id } }
+        { _id: { $in: userToDelete.events } },
+        { $pull: { organizer: userToDelete._id } }
       ),
 
       // Update the 'orders' collection to remove references to the user
-      Order.updateMany({ _id: { $in: user.orders } }, { $unset: { buyer: 1 } }),
+      Order.updateMany(
+        { _id: { $in: userToDelete.orders } },
+        { $unset: { buyer: 1 } }
+      ),
     ]);
 
     // Delete user
-    const deletedUser = await User.findByIdAndDelete(user._id);
+    const deletedUser = await User.findByIdAndDelete(userToDelete._id);
     revalidatePath("/");
 
-    return deletedUser;
+    return deletedUser ? JSON.parse(JSON.stringify(deletedUser)) : null;
   } catch (error) {
     handleError(error);
   }
