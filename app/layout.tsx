@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-// import "@clerk/nextjs/styles.css";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
+
 import "./globals.css";
 
 const poppins = Poppins({
@@ -18,7 +12,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Evently",
-  description: "Evently is a platform for event management",
+  description: "Evently is a platform for event management.",
   icons: {
     icon: "/assets/images/logo.svg",
   },
@@ -26,21 +20,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${poppins.variable} antialiased`}>
-          {/* <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn> */}
-          {children}
-        </body>
+        <body className={poppins.variable}>{children}</body>
       </html>
     </ClerkProvider>
   );

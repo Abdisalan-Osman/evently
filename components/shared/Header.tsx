@@ -30,8 +30,7 @@ function Header() {
             <MobileNav />
           </SignedIn>
           <SignedOut>
-            <Button className="rounded-full" size="lg">
-              {/* <SignInButton /> */}
+            <Button asChild className="rounded-full" size="lg">
               <Link href="/sign-in">Login</Link>
             </Button>
           </SignedOut>

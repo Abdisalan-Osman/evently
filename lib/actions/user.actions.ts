@@ -28,6 +28,10 @@ interface UpdateUserParams {
 export async function createUser(user: CreateUserParams) {
   try {
     await connectDB();
+    // Check for missing required fields
+    if (!user.clerkId || !user.email || !user.username) {
+      throw new Error("Missing required user data");
+    }
     const newUser = await User.create(user);
     JSON.parse(JSON.stringify(newUser));
   } catch (error) {
